@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 
 from buildx.initialize import Initialize
+from buildx.build import ImageBuild
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000
@@ -39,7 +40,30 @@ def process_code():
 
 @app.route('api/v1/buildx', methods=['GET'])
 def build_code():
-    pass
+    if request.args.get('source_code'):
+        check_docker_file_exist = ImageBuild.checkDockerfileExist(
+            app.config['SOURCE_CODES_PATH'],
+            request.args.get('source_code')
+        )
+        if not check_docker_file_exist:
+            ImageBuild.generateDockerfile(
+                source_path=app.config['SOURCE_CODES_PATH'],
+                source_code=request.args.get('source_code'),
+                language=request.args.get('source_language')
+            )
+        ImageBuild.buildDockerfile(
+            source_path=app.config['SOURCE_CODES_PATH'],
+            source_code=request.args.get('source_code')
+        )
+
+    elif not request.args.get('source_code'):
+        resp = jsonify({'message': 'No source code defined'})
+        resp.status_code = 400
+        return resp
+    else:
+        resp = jsonify({'message': 'Not Found'})
+        resp.status_code = 404
+        return resp
 
 
 if __name__ == "__main__":
