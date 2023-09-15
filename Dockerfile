@@ -10,4 +10,17 @@ ENV PATH $PATH:/usr/local/bin:/kaniko
 ENV DOCKER_CONFIG /kaniko/.docker/
 ENV DOCKER_CREDENTIAL_GCR_CONFIG /kaniko/.config/gcloud/docker_credential_gcr_config.json
 
-RUN mkdir -p /data/codes
+ENV HTTP_PROXY=http://192.168.0.103:1081
+ENV HTTPS_PROXY=http://192.168.0.103:1081
+
+WORKDIR /buildx
+
+COPY requirements.txt requirements.txt
+
+RUN pip3 install -r requirements.txt
+
+COPY . .
+
+RUN mkdir -p /data/codes && chmod +x entrypoint.sh
+
+ENTRYPOINT ["/bin/bash", "-c", "/buildx/entrypoint.sh"]

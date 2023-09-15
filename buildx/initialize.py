@@ -1,3 +1,4 @@
+import logging
 import zipfile
 import tarfile
 import rarfile
@@ -8,8 +9,8 @@ class Initialize:
 
     @staticmethod
     def extractSourceCode(file_name, file_path):
-        extension = file_name[1].lower()
-        file_name = file_name[0].lower()
+        extension = file_name.split('.')[1].lower()
+        file_name = file_name.split('.')[0].lower()
 
         source_path = file_path + '/' + file_name + '.' + extension
         destination_path = file_path + '/' + file_name

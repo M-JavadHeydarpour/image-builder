@@ -1,3 +1,4 @@
+import logging
 import os
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
@@ -21,14 +22,14 @@ def process_code():
         resp.status_code = 400
         return resp
     sourcecode = request.files['sourcecode']
-    if sourcecode.sourcecodename == '':
+    if sourcecode.filename == '':
         resp = jsonify({'message': 'No sourcecode selected for uploading'})
         resp.status_code = 400
         return resp
-    if sourcecode and allowed_sourcecode(sourcecode.sourcecodename):
-        sourcecodename = secure_filename(sourcecode.sourcecodename)
+    if sourcecode and allowed_sourcecode(sourcecode.filename):
+        sourcecodename = secure_filename(sourcecode.filename)
         sourcecode.save(os.path.join(app.config['SOURCE_CODES_PATH'], sourcecodename))
-        Initialize.extractSourceCode(sourcecodename.split('.')[0], app.config['SOURCE_CODES_PATH'])
+        Initialize.extractSourceCode(sourcecode.filename, app.config['SOURCE_CODES_PATH'])
         resp = jsonify({'message': 'sourcecode successfully uploaded'})
         resp.status_code = 201
         return resp
@@ -38,7 +39,7 @@ def process_code():
         return resp
 
 
-@app.route('api/v1/buildx', methods=['GET'])
+@app.route('/api/v1/buildx', methods=['GET'])
 def build_code():
     if request.args.get('source_code'):
         check_docker_file_exist = ImageBuild.checkDockerfileExist(

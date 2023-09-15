@@ -14,7 +14,12 @@ class ImageBuild:
     @staticmethod
     def generateDockerfile(source_path, source_code, language):
         try:
-            dockerfile_template_path = os.path.abspath(os.path.join("dockerfiles", f"{language.upper()}_DOCKERFILE"))
+            dockerfile_template_path = os.path.abspath(
+                os.path.join(
+                    "/buildx/dockerfiles",
+                    f"{language.upper()}_DOCKERFILE"
+                )
+            )
             dest_path = os.path.join(source_path, source_code)
             shutil.copy(dockerfile_template_path, os.path.join(dest_path, "Dockerfile"))
         except Exception as e:
@@ -23,12 +28,10 @@ class ImageBuild:
     @staticmethod
     def buildDockerfile(source_path, source_code):
         source_code_path = os.path.join(source_path, source_code)
-        kaniko_command = [
-            "/kaniko/executor"
-            "--dockerfile=Dockerfile",
-            f"--context={source_code_path}",
-            f"--destination=172.17.0.2:5000/{source_code}:latest"
-        ]
+        kaniko_command = "/kaniko/executor" \
+            " --dockerfile=Dockerfile" \
+            f" --context={source_code_path}" \
+            f" --destination=172.17.0.2:5000/{source_code}:latest"
 
         try:
             result = subprocess.run(
