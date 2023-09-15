@@ -52,10 +52,19 @@ def build_code():
                 source_code=request.args.get('source_code'),
                 language=request.args.get('source_language')
             )
-        ImageBuild.buildDockerfile(
-            source_path=app.config['SOURCE_CODES_PATH'],
-            source_code=request.args.get('source_code')
-        )
+        try:
+            ImageBuild.buildDockerfile(
+                source_path=app.config['SOURCE_CODES_PATH'],
+                source_code=request.args.get('source_code')
+            )
+        except Exception:
+            resp = jsonify({'message': 'sorry, we can not build now'})
+            resp.status_code = 500
+            return resp
+
+        resp = jsonify({'message': 'sourcecode successfully built'})
+        resp.status_code = 200
+        return resp
 
     elif not request.args.get('source_code'):
         resp = jsonify({'message': 'No source code defined'})
